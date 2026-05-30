@@ -124,12 +124,89 @@ void addData(hashTable* storage){
     printf("Produk berhasil ditambahkan.\n");
 }
 
+/**typedef struct Location
+{
+    char zone[4]; //DRY, WET, FRZ, CHM
+    int aisle; //walkways in the warehouse
+    char bay[2]; //section of rack
+    int level; //vertical level of rack
+    char position;
+} Location;
+ */
+
 void storeLocation(Node* data, char* coordinate){
     //template koordinat: zona - aisle - bay - level - position
+    char* token = strtok(coordinate, '-');
+    
+    if(!token){
+        perror("Error parsing.");
+        return;
+    }
+    strncpy(data->info.plot.zone, token, strlen(token)-1); //zona
+    data->info.plot.zone[strlen(token)-1] = '\0';
+
+    token = strtok(NULL, '-'); //walkway/lorong
+    data->info.plot.aisle = atoi(token);
+    
+    token = strtok(NULL, '-'); //rak
+    strncpy(data->info.plot.bay, token, 2);
+    
+    token = strtok(NULL, '-'); //level horizontal di rak tertentu
+    data->info.plot.level = atoi(token);
+
+    token = strtok(NULL, '-'); //position
+    data->info.plot.position = token;
 }
 
-void removeData(hashTable* storage);
-void searchProduct(hashTable* storage);
+void removeData(hashTable* storage){
+    char ID[20];
+    printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
+    
+    int idx = djbHashFunction(ID);
+    Node* curr = storage->table[idx];
+    
+    Node* temp;
+    while(curr){
+        if(curr->next != NULL && curr->next->info.ID == ID){
+            temp = curr->next->next;
+            free(curr->next);
+            if(temp){
+                curr->next = temp;
+            } else{
+                curr->next = NULL;
+            }
+        }
+        curr = curr->next;
+    }
+}
+
+void searchProduct(hashTable* storage){
+    char ID[20];
+    printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
+    
+    int idx = djbHashFunction(ID);
+    Node* curr = storage->table[idx];
+    
+    while(curr){
+        if(curr->info.ID == ID){
+            char print;
+            printf("Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n)");
+            scanf("%c", &print);
+            if(print=='y'){
+                printf("ID Produk: %s", curr->info.ID);
+                printf("Nama Produk: %s", curr->info.name);
+                printf("Kategori: %s", curr->info.category);
+                printf("Jumlah stok: %s", curr->info.numStock);
+                printf("Lokasi: %s-%d-%c-%d-%c", curr->info.plot.zone, curr->info.plot.aisle,
+                    curr->info.plot.bay, curr->info.plot.level, curr->info.plot.position); //contohnya DRY-1-B-1-A
+                //PIC sama status barang belum ditambahin
+            }
+            return;
+        }
+        curr = curr->next;
+    }
+}
+
 void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
 void printAllProducts(hashTable* storage);
