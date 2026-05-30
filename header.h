@@ -52,7 +52,7 @@ typedef struct hashTable
 
 int djbHashFunction(char* id);
 
-void menu(hashTable storage);
+void menu(hashTable* storage);
 void addData(hashTable* storage);
 void storeLocation(Node* data, char* coordinate);
 
