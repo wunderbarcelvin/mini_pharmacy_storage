@@ -17,25 +17,28 @@ struktur datanya? i guess hash table
 
 /**1. Setiap data inventaris setidaknya memuat: ID barang, nama komponen/peralatan, kategori 
 barang, jumlah stok, lokasi penyimpanan, status barang (misalnya tersedia, dipinjam, rusak, atau habis), pemilik barang serta PIC untuk barang tersebut. 
+
  */
 
 
 typedef struct Location
 {
-    char zone[4]; //DRY, WET, FRZ, CHM
-    int aisle; //walkways in the warehouse
-    char bay[2]; //section of rack
-    int level; //vertical level of rack
-    char position;
+    char aisle[2]; //walkways in the warehouse, contohnya A1
+    char bay[2]; //section of rack, contohnya B2
+    char level[2]; //vertical level of rack
+    char position[2];
 } Location;
 
 typedef struct Data
 {
-    char ID[20];
+    char ID[10];
     char name[30];
     char category[15];
     int numStock;
     Location plot;
+    char status[10];
+    char PIC[20];
+    char owner[20];
 } Data;
 
 typedef struct Node
@@ -59,11 +62,14 @@ void storeLocation(Node* data, char* coordinate);
 
 void removeData(hashTable* storage);
 void searchProduct(hashTable* storage);
-void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
 void printAllProducts(hashTable* storage);
 void printUniques(hashTable* storage);
 void mask(hashTable* storage);
 
+void printUniquePIC(hashTable* storage, int* count);
+void printUniqueName(hashTable* storage, int* count);
+void printUniqueCategory(hashTable* storage, int* count);
+void printUniqueOwnwer(hashTable* storage, int* count);
 
 #endif
