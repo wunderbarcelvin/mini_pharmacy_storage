@@ -211,4 +211,56 @@ void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
 void printAllProducts(hashTable* storage);
 void printUniques(hashTable* storage);
-void mask(hashTable* storage);
+void mask(hashTable* storage){
+    int minStock, maxStock;
+    int found = 0;
+
+    printf("Masukkan batas bawah jumlah stok: ");
+    scanf("%d", &minStock);
+    printf("Masukkan batas atas jumlah stok: ");
+    scanf("%d", &maxStock);
+
+    printf("\n=== Hasil Pencarian Filter Stok (%d - %d) ===\n", minStock, maxStock);
+
+    for (int i = 0; i < 10; i++) {
+        Node* curr = storage->table[i];
+
+        while (curr != NULL) {
+            if (curr->info.numStock >= minStock && curr->info.numStock <= maxStock) {
+                found = 1;
+                char maskedID[20];
+                int len = strlen(curr->info.ID);
+
+                strcpy(maskedID, curr->info.ID);
+                if (len > 4) {
+                    for (int j = 2; j < len - 2; j++) {
+                        maskedID[j] = '*';
+                    }
+
+                    for (int j = 1; j < len; j++) {
+                        maskedID[j] = '*';
+                    }
+                }
+
+                printf("ID Produk   : %s\n", maskedID);
+                printf("Nama Produk : %s\n", curr->info.name);
+                printf("Kategori    : %s\n", curr->info.category);
+                printf("Jumlah stok : %d\n", curr->info.numStock);
+            
+                printf("Lokasi      : %s-%d-%s-%d-%c\n", 
+                       curr->info.plot.zone, 
+                       curr->info.plot.aisle, 
+                       curr->info.plot.bay, 
+                       curr->info.plot.level, 
+                       curr->info.plot.position);
+                       
+                printf("---------------------------------------\n");
+            }
+            curr = curr->next;
+        }
+    }
+
+    if (!found) {
+        printf("Tidak ada produk yang ditemukan dalam interval stok tersebut.\n");
+    }
+}
