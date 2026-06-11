@@ -209,8 +209,113 @@ void searchProduct(hashTable* storage){
 
 void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
-void printAllProducts(hashTable* storage);
-void printUniques(hashTable* storage);
+void printAllProducts(hashTable* storage){
+    int isEmpty = 1; //penanda barang ini kosong atau tidak
+
+    printf("\n=== DAFTAR SELURUH INVENTARIS ===\n");
+
+    for (int i = 0; i < 10; i++) {
+        Node* curr = storage->table[i];
+        
+        while (curr != NULL) {
+            isEmpty = 0; // Begitu ketemu minimal 1 data, flag diubah jadi 0 (tidak kosong)
+
+            //print spesifikasi barang
+            printf("----------------------------------\n");
+            printf("ID Barang   : %s\n", curr->info.ID);
+            printf("Nama Alat   : %s\n", curr->info.name);
+            printf("Kategori    : %s\n", curr->info.category);
+            printf("Jumlah Stok : %d\n", curr->info.numStock); 
+            
+            // Mencetak lokasi
+            printf("Lokasi      : %s-%d-%s-%d-%c\n", 
+                   curr->info.plot.zone, 
+                   curr->info.plot.aisle, 
+                   curr->info.plot.bay, 
+                   curr->info.plot.level, 
+                   curr->info.plot.position);            
+
+            curr = curr->next; // Geser ke node/barang selanjutnya di storage yang sama
+        }
+    }
+
+    // kondisi ketika data kosong
+    if (isEmpty == 1) {
+        printf("Data kosong! Belum ada inventaris di dalam sistem.\n");
+    }
+    
+    printf("==================================\n\n");
+
+}
+void printUniques(hashTable* storage){
+    int pilihan;
+    char keyword[30];
+    int count = 0; // Untuk menghitung jumlah barang unik yang ditemukan
+
+    printf("\n=== MENCARI KLASIFIKASI PRODUK ===\n");
+    printf("Pilih dasar klasifikasi pencarian:\n");
+    printf("1. Berdasarkan Kategori\n");
+    printf("2. Berdasarkan Zona Lokasi (contoh: DRY)\n");
+    
+    printf("Masukkan pilihan Anda: ");
+    scanf("%d", &pilihan);
+
+    // Meminta kata kunci dari user berdasarkan pilihannya
+    if (pilihan == 1) {
+        printf("Masukkan nama kategori yang dicari: ");
+        scanf("%s", keyword);
+    } else if (pilihan == 2) {
+        printf("Masukkan kode zona yang dicari: ");
+        scanf("%s", keyword);
+    } 
+    /*
+    else if (pilihan == 3) {
+        printf("Masukkan status yang dicari: ");
+        scanf("%s", keyword);
+    } ini harusnya ada tapi di header belum ada di header. harusnya ada filter berdasarkan dipinjam atau bla bla bla
+     tapi aing tidak mau mengubah header dlu takut error*/
+    
+    else {
+        printf("Pilihan tidak valid. Kembali ke menu utama.\n");
+        return; 
+    }
+
+    printf("\n--- Hasil Pencarian untuk '%s' ---\n", keyword);
+
+    // Looping seluruh isi Hash Table
+    for (int i = 0; i < 10; i++) {
+        Node* curr = storage->table[i];
+        
+        while (curr != NULL) {
+            int isMatch = 0; // Flag untuk menandai apakah barang cocok dengan filter
+
+            // Cek kecocokan menggunakan strcmp 
+            if (pilihan == 1 && strcmp(curr->info.category, keyword) == 0) {
+                isMatch = 1;
+            } else if (pilihan == 2 && strcmp(curr->info.plot.zone, keyword) == 0) {
+                isMatch = 1;
+            } 
+           
+
+            // Jika barang cocok dengan filter, cetak ke layar
+            if (isMatch == 1) {
+                printf("- [%s] %s (Stok: %d)\n", curr->info.ID, curr->info.name, curr->info.numStock);
+                count++; 
+            }
+
+            curr = curr->next;
+        }
+    }
+
+    // Penanganan jika tidak ada data yang cocok sesuai syarat
+    if (count == 0) {
+        printf("Tidak ditemukan produk dengan klasifikasi '%s'.\n", keyword);
+    } else {
+        printf("\nTotal: %d macam produk unik ditemukan.\n", count);
+    }
+    printf("==================================\n\n");
+}
+
 void mask(hashTable* storage){
     int minStock, maxStock;
     int found = 0;
