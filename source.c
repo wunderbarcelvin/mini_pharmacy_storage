@@ -1,6 +1,7 @@
 #include "header.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int djbHashFunction(char* id){ //inspired by Dan Berstein
     unsigned long hash = 5381;
@@ -188,12 +189,12 @@ void searchProduct(hashTable* storage){
     Node* curr = storage->table[idx];
     
     while(curr){
-        if(curr->info.ID == ID){
+        if(strcmp(curr->info.ID, ID)==0){
             char print;
             printf("Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n)");
             scanf("%c", &print);
             if(print=='y'){
-                printf("ID Produk: %s", curr->info.ID);
+                printf("ID Produk: %s", curr);
                 printf("Nama Produk: %s", curr->info.name);
                 printf("Kategori: %s", curr->info.category);
                 printf("Jumlah stok: %s", curr->info.numStock);
@@ -209,6 +210,8 @@ void searchProduct(hashTable* storage){
 
 void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
+
+//printAllProducts dan printUniques masih di local repo
 void printAllProducts(hashTable* storage){
     int isEmpty = 1; //penanda barang ini kosong atau tidak
 
