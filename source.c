@@ -35,13 +35,14 @@ void menu(hashTable* storage){
         printf(">> Silakan pilih salah satu instruksi di bawah.\n");
 
         printf("1. Menambahkan produk.\n");
-        printf("2. Menghapus produk.\n");
-        printf("3. Mencari produk.\n");
-        printf("4. Memutakhirkan info produk.\n");
-        printf("5. Cetak semua produk.\n");
-        printf("6. Mencari klasifikasi produk tertentu.\n");
-        printf("7. Mencari produk tertentu dengan kunci filter tertentu.\n");
-        printf("8. Keluar dari program.\n");
+        printf("2. Menghapus data produk.\n");
+        printf("3. Menarik produk (withdraw).\n");
+        printf("4. Mencari produk.\n");
+        printf("5. Memutakhirkan info produk.\n");
+        printf("6. Cetak semua produk.\n");
+        printf("7. Mencari klasifikasi produk tertentu.\n");
+        printf("8. Mencari produk tertentu dengan kunci filter tertentu.\n");
+        printf("9. Keluar dari program.\n");
         scanf("%d", &choice);
 
         switch (choice)
@@ -53,28 +54,31 @@ void menu(hashTable* storage){
             removeData(storage);
             break;
         case 3:
-            searchProduct(storage);
+            withdrawProduct(storage);
             break;
         case 4:
-            updateProduct(storage);
+            searchProduct(storage);
             break;
         case 5:
-            printAllProducts(storage);
+            updateProduct(storage);
             break;
         case 6:
-            printUniques(storage);
+            printAllProducts(storage);
             break;
         case 7:
-            mask(storage);
+            printUniques(storage);
             break;
         case 8:
-            printf(">> Keluar dari program..\n");
+            mask(storage);
             break;
+        case 9:
+            printf(">> Keluar dari program..\n");
+            return;
         default:
             printf(">> Perintah tidak dikenali. Coba lagi.\n");
             break;
         }
-    } while (choice!=8);
+    } while (choice!=9);
 }
 
 
@@ -87,6 +91,11 @@ void addData(hashTable* storage){
     char inputID[10];
     
     printf("Masukkan ID: "); scanf("%s", inputID); //masukkan ID
+    if(strcmp(inputID, "cancel")==0){
+        printf(">> Perintah dibatalkan. Kembali ke menu utama..\n");
+        return;
+    }
+
     int idx = djbHashFunction(inputID);
 
     //printf("Masukkan nama alat/barang: "); scanf("%s", new->info.name); //masukkan nama
@@ -183,6 +192,11 @@ void removeData(hashTable* storage){ //menggunakan
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
     
+    if(strcmp(ID, "cancel")==0){
+        printf(">> Perintah dibatalkan. Kembali ke menu utama..\n");
+        return;
+    }
+    
     int idx = djbHashFunction(ID);
     Node* curr = storage->table[idx];
     
@@ -208,6 +222,12 @@ void removeData(hashTable* storage){ //menggunakan
 void withdrawProduct(hashTable* storage){ //fungsi baru
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
+    
+    //untuk membatalkan perintah
+    if(strcmp(ID, "cancel")==0){
+        printf(">> Perintah dibatalkan. Kembali ke menu utama..\n");
+        return;
+    }
     
     int idx = djbHashFunction(ID);
     Node* curr = storage->table[idx];
@@ -253,6 +273,12 @@ void searchProduct(hashTable* storage){
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
     
+    //untuk membatalkan perintah
+    if(strcmp(ID, "cancel")==0){
+        printf(">> Perintah dibatalkan. Kembali ke menu utama..\n");
+        return;
+    }
+
     int idx = djbHashFunction(ID);
     Node* curr = storage->table[idx];
     
@@ -262,16 +288,17 @@ void searchProduct(hashTable* storage){
             printf(">> Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n): ");
             scanf(" %c", &print);
             if(print=='y'|| print=='Y'){
-                printf("ID Produk: %s", curr->info.ID);
-                printf("Nama Produk: %s", curr->info.name);
-                printf("Kategori: %s", curr->info.category);
-                printf("Jumlah stok: %d", curr->info.numStock);
-                printf("Lokasi: %s-%s-%s-%s", curr->info.plot.aisle,
+                printf("=== DETAIL PRODUK ===\n");
+                printf("ID Produk.  : %s\n", curr->info.ID);
+                printf("Nama Produk : %s\n", curr->info.name);
+                printf("Kategori.   : %s\n", curr->info.category);
+                printf("Jumlah stok : %d\n", curr->info.numStock);
+                printf("Lokasi.     : %s-%s-%s-%s\n", curr->info.plot.aisle,
                     curr->info.plot.bay, curr->info.plot.level, curr->info.plot.position); //contohnya DRY-1-B-1-A
                 //PIC sama status barang belum ditambahin
-                printf("Status: %s", curr->info.status);
-                printf("Nama PIC: %s", curr->info.PIC);
-                printf("Nama Pemilik: %s", curr->info.owner);
+                printf("Status.     : %s\n", curr->info.status);
+                printf("Nama PIC.   : %s\n", curr->info.PIC);
+                printf("Nama Pemilik: %s\n", curr->info.owner);
             }
             return;
         }
@@ -285,6 +312,12 @@ void updateProduct(hashTable* storage) { //UPDATE ADA YANG DIUBAH
     printf("\n=== MENU PEMUTAKHIRAN DATA PRODUK ===\n");
     printf("Masukkan ID barang yang ingin diubah: ");
     scanf("%s", ID);
+
+    //untuk membatalkan perintah
+    if(strcmp(ID, "cancel")==0){
+        printf(">> Perintah dibatalkan. Kembali ke menu utama..\n");
+        return;
+    }
 
     int idx = djbHashFunction(ID);
     Node* curr = storage->table[idx];
@@ -373,9 +406,23 @@ void printAllProducts(hashTable* storage){
         while (curr != NULL) {
             isEmpty = 0; // Begitu ketemu minimal 1 data, flag diubah jadi 0 (tidak kosong)
 
+            char maskedID[20];
+            int len = strlen(curr->info.ID);
+
+            strcpy(maskedID, curr->info.ID);
+            if (len > 4) {
+                for (int j = 2; j < len - 2; j++) {
+                    maskedID[j] = '*';
+                }
+
+                for (int j = 1; j < len; j++) {
+                    maskedID[j] = '*';
+                }
+            }
+
             //print spesifikasi barang
             printf("----------------------------------\n");
-            printf("ID Barang   : %s\n", curr->info.ID);
+            printf("ID Barang   : %s\n", maskedID);
             printf("Nama Alat   : %s\n", curr->info.name);
             printf("Kategori    : %s\n", curr->info.category);
             printf("Jumlah Stok : %d\n", curr->info.numStock); 
@@ -404,10 +451,9 @@ void printAllProducts(hashTable* storage){
 
 }
 void printUniques(hashTable* storage){
+    
     int pilihan;
-    char keyword[30];
     int countUnique;
-
 
     printf("\n=== MENCARI NILAI UNIK ===\n");
     printf("Pilih dasar klasifikasi pencarian:\n");
@@ -418,7 +464,7 @@ void printUniques(hashTable* storage){
     
     printf("Masukkan pilihan Anda: ");
     scanf("%d", &pilihan);
-    
+
     switch (pilihan)
     {
     case 1:
@@ -435,36 +481,8 @@ void printUniques(hashTable* storage){
         break; 
     default:
         printf("Pilihan tidak valid. Kembali ke menu utama.\n");
-        break;
+        return;
     }
-
-    /**printf("\n--- Hasil Pencarian untuk '%s' ---\n", keyword);
-
-    // Looping seluruh isi Hash Table
-    for (int i = 0; i < 10; i++) {
-        Node* curr = storage->table[i];
-        
-        while (curr != NULL) {
-            int isMatch = 0; // Flag untuk menandai apakah barang cocok dengan filter
-
-            // Cek kecocokan menggunakan strcmp 
-            if (pilihan == 1 && strcmp(curr->info.category, keyword) == 0) {
-                isMatch = 1;
-            } else if (pilihan == 2 && strcmp(curr->info.plot.zone, keyword) == 0) {
-                isMatch = 1;
-            } else if (pilihan == 3 && strcmp(curr->info.status, keyword) == 0){
-                isMatch = 1;
-            }
-
-            // Jika barang cocok dengan filter, cetak ke layar
-            if (isMatch == 1) {
-                printf("- [%s] %s (Stok: %d)\n", curr->info.ID, curr->info.name, curr->info.numStock);
-                count++; 
-            }
-
-            curr = curr->next;
-        }
-    }**/
 
     // Penanganan jika tidak ada data yang cocok sesuai syarat
     printf("\nTotal: %d macam produk unik ditemukan.\n", countUnique);
@@ -517,8 +535,8 @@ void mask(hashTable* storage){ //MASK ADA YANG DIUBAH
     for (int i = 0; i < 10; i++) {
         Node* curr = storage->table[i];
 
-        int doPrint = 0;
         while (curr != NULL) {
+            int doPrint = 0;
             switch (pilihan)
             {
                 case 1:
