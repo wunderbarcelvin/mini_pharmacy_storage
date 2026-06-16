@@ -32,11 +32,11 @@ typedef struct Location
 typedef struct Data
 {
     char ID[10];
-    char name[30];
+    char name[15];
     char category[15];
     int numStock;
     Location plot;
-    char status[10];
+    char status[8];
     char PIC[20];
     char owner[20];
 } Data;
@@ -58,9 +58,9 @@ int djbHashFunction(char* id);
 void menu(hashTable* storage);
 void addData(hashTable* storage);
 void storeLocation(Node* data, char* coordinate);
-
-
 void removeData(hashTable* storage);
+
+void withdrawProduct(hashTable* storage);
 void searchProduct(hashTable* storage);
 void updateProduct(hashTable* storage);
 void printAllProducts(hashTable* storage);

@@ -179,29 +179,73 @@ void storeLocation(Node* data, char* coordinate){
     data->info.plot.position[2] = '\0';
 }
 
-void removeData(hashTable* storage){
+void removeData(hashTable* storage){ //menggunakan
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
     
     int idx = djbHashFunction(ID);
     Node* curr = storage->table[idx];
     
-    Node* temp;
+    Node* prev=NULL;
     while(curr){
-        if(curr->next != NULL && curr->next->info.ID == ID){
-            temp = curr->next->next;
-            free(curr->next);
-            if(temp){
-                curr->next = temp;
+        if(strcmp(curr->info.ID, ID)==0){
+            if(prev==NULL){ //jika di urutan terdepan dari indexing hash table
+                storage->table[idx]=curr->next;
             } else{
-                curr->next = NULL;
+                prev->next = curr->next;
             }
+            free(curr);
             printf("Data produk berhasil dihapus.\n");
             return;
         }
+        prev = curr;
         curr = curr->next;
     }
     
+    printf("Data produk tidak ditemukan.\n");
+}
+
+void withdrawProduct(hashTable* storage){ //fungsi baru
+    char ID[20];
+    printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
+    
+    int idx = djbHashFunction(ID);
+    Node* curr = storage->table[idx];
+    
+    while(curr){
+        if(strcmp(curr->info.ID, ID)==0){
+            while(1){
+                int numReq;
+                printf("Masukkan jumlah barang yang akan digunakan: ");
+                scanf("%d", &numReq);
+                
+                if(scanf("%d", &numReq) != 1){
+                    printf("Input tidak valid! Harap masukkan angka.\n");
+                    while (getchar() != '\n')
+                    continue;;
+                }
+                
+                if(numReq==0){
+                    printf("Coba masukkan angka lebih dari nol.\n");
+                    continue;
+                }
+                
+                if(curr->info.numStock - numReq>=0){
+                    curr->info.numStock-=numReq;
+                    printf("Produk %s sejumlah %d unit berhasil ditarik.\n", curr->info.name, numReq);
+                    
+                    if(curr->info.numStock==0){
+                        strcpy(curr->info.status, "Habis");
+                    }
+                    return;
+                }
+
+                printf("Jumlah unit yang diminta melebihi stok. Coba lagi.\n");
+            }
+           
+        }
+        curr = curr->next;
+    }
     printf("Data produk tidak ditemukan.\n");
 }
 
@@ -215,13 +259,13 @@ void searchProduct(hashTable* storage){
     while(curr){
         if(strcmp(curr->info.ID, ID)==0){
             char print;
-            printf("Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n)");
-            scanf("%c", &print);
-            if(print=='y'){
+            printf("Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n): ");
+            scanf(" %c", &print);
+            if(print=='y'|| print=='Y'){
                 printf("ID Produk: %s", curr);
                 printf("Nama Produk: %s", curr->info.name);
                 printf("Kategori: %s", curr->info.category);
-                printf("Jumlah stok: %s", curr->info.numStock);
+                printf("Jumlah stok: %d", curr->info.numStock);
                 printf("Lokasi: %s-%s-%s-%s", curr->info.plot.aisle,
                     curr->info.plot.bay, curr->info.plot.level, curr->info.plot.position); //contohnya DRY-1-B-1-A
                 //PIC sama status barang belum ditambahin
@@ -233,6 +277,7 @@ void searchProduct(hashTable* storage){
         }
         curr = curr->next;
     }
+    printf("Data produk tidak ditemukan.\n");
 }
 
 void updateProduct(hashTable* storage) {
@@ -240,7 +285,7 @@ void updateProduct(hashTable* storage) {
     printf("\n=== MENU PEMUTAKHIRAN DATA PRODUK ===\n");
     printf("Masukkan ID barang yang ingin diubah: ");
     scanf("%s", ID);
-//masih bingung aku, 
+
     int idx = djbHashFunction(ID);
     
     Node* curr = storage->table[idx];
@@ -250,46 +295,40 @@ void updateProduct(hashTable* storage) {
             int option;
             printf("\nProduk Ditemukan: %s (Kategori: %s)\n", curr->info.name, curr->info.category);
             printf("Pilih data yang ingin Anda mutakhirkan:\n");
-            printf("1. Jumlah Stok\n");
-            printf("2. Lokasi Penyimpanan\n");
-            printf("3. Status Barang (Tersedia/Dipinjam/Rusak/Habis)\n");
-            printf("4. Pemilik Barang\n");
-            printf("5. PIC Barang\n");
-            printf("Masukkan pilihan (1-5): ");
+            printf("1. Lokasi Penyimpanan\n");
+            printf("2. Status Barang (Tersedia/Dipinjam/Rusak/Habis)\n");
+            printf("3. Pemilik Barang\n");
+            printf("4. PIC Barang\n");
+            printf("Masukkan pilihan (1-4): ");
             scanf("%d", &option);
 
             while (getchar() != '\n'); 
 
             switch(option) {
-                case 1:
-                    printf("Masukkan Jumlah Stok Baru: ");
-                    scanf("%d", &curr->info.numStock);
-                    printf(">> [SUKSES] Jumlah stok berhasil diperbarui menjadi %d!\n", curr->info.numStock);
-                    break;
-                
-                case 2: {
+                case 1: {
                     char newLocation[15];
-                    printf("Masukkan koordinat lokasi baru (Format: ZON-Walkway-Bay-Level-Posisi, misal DRY-1-B-1-A): ");
+                    printf("Masukkan koordinat lokasi baru (Format: Aisle-Bay-Level-Posisi, misal A1-B1-L1-P1): ");
                     fgets(newLocation, sizeof(newLocation), stdin);
+                    storeLocation(curr, newLocation);
                     printf(">> [SUKSES] Lokasi penyimpanan berhasil diperbarui!\n");
                     break;
                 }
                 
-                case 3:
+                case 2:
                     printf("Masukkan Status Baru: ");
                     fgets(curr->info.status, sizeof(curr->info.status), stdin);
                     curr->info.status[strcspn(curr->info.status, "\n")] = 0; 
                     printf(">> [SUKSES] Status berhasil diperbarui!\n");
                     break;
                 
-                case 4:
+                case 3:
                     printf("Masukkan Nama Pemilik Baru: ");
                     fgets(curr->info.owner, sizeof(curr->info.owner), stdin);
                     curr->info.owner[strcspn(curr->info.owner, "\n")] = 0;
                     printf(">> [SUKSES] Pemilik barang berhasil diperbarui!\n");
                     break;
                 
-                case 5:
+                case 4:
                     printf("Masukkan Nama PIC Baru: ");
                     fgets(curr->info.PIC, sizeof(curr->info.PIC), stdin);
                     curr->info.PIC[strcspn(curr->info.PIC, "\n")] = 0;
