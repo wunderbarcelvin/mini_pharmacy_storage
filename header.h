@@ -1,9 +1,12 @@
 #ifndef TUBES_H
 #define TUBES_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <windows.h>
+#include <stdbool.h>
 
 /**Spesifikasi fungsi:
 Add data
@@ -55,6 +58,12 @@ typedef struct hashTable
 {
     Node* table[10];
 } hashTable;
+
+//serial commmunication
+void initSerial(const char* port);
+void sendSerial(const char* msg);
+void loadDataFromArduino(hashTable* storage);
+void saveDataToArduino(hashTable* storage);
 
 
 int djbHashFunction(char* id);

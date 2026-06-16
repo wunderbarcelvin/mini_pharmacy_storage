@@ -1,8 +1,4 @@
 #include "header.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 
 int djbHashFunction(char* id){ //inspired by Dan Berstein
     unsigned long hash = 5381;
@@ -25,6 +21,135 @@ Print all data
 Print summary about inventories. Di sini bisa buat subfungsi menu dalam voidnya
 Classify based on category, location, and status
 Mask ID based on interval of number of stock */
+HANDLE hComm;
+
+void initSerial(const char* port){
+    hComm = CreateFile(port, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (hComm == INVALID_HANDLE_VALUE) return;
+    
+    DCB dcb = {0};
+    dcb.DCBlength = sizeof(dcb);
+    GetCommState(hComm, &dcb);
+    dcb.BaudRate = CBR_9600;
+    dcb.ByteSize = 8;
+    dcb.StopBits = ONESTOPBIT;
+    dcb.Parity = NOPARITY;
+    SetCommState(hComm, &dcb);
+    
+    COMMTIMEOUTS timeouts = {0};
+    timeouts.ReadIntervalTimeout = 50;
+    timeouts.ReadTotalTimeoutConstant = 50;
+    timeouts.ReadTotalTimeoutMultiplier = 10;
+    timeouts.WriteTotalTimeoutConstant = 50;
+    timeouts.WriteTotalTimeoutMultiplier = 10;
+    SetCommTimeouts(hComm, &timeouts);
+    Sleep(2000); 
+}
+
+void sendSerial(const char* msg) {
+    if (hComm == INVALID_HANDLE_VALUE) return;
+    DWORD written;
+    WriteFile(hComm, msg, strlen(msg), &written, NULL);
+    Sleep(100);
+}
+
+void loadDataFromArduino(hashTable* storage) {
+    if (hComm == INVALID_HANDLE_VALUE) {
+        printf(">> [PERINGATAN] Arduino tidak terdeteksi. Berjalan tanpa backup.\n");
+        return;
+    }
+    
+    printf(">> Mengambil data inventaris dari Arduino...\n");
+    sendSerial("CMD:LOAD\n");
+    Sleep(1500); 
+
+    char buffer[1024] = {0};
+    DWORD bytesRead;
+    ReadFile(hComm, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
+    
+    char* line = buffer;
+    char* next_line = NULL;
+    int count = 0;
+
+    while (line && *line) {
+        next_line = strchr(line, '\n');
+        if (next_line) {
+            *next_line = '\0'; 
+            if (next_line > buffer && *(next_line - 1) == '\r') {
+                *(next_line - 1) = '\0'; 
+            }
+            next_line++; 
+        }
+
+        if (strcmp(line, "END_LOAD") == 0) break;
+        
+        if (strlen(line) > 0) {
+            Node* new = malloc(sizeof(Node));
+            new->next = NULL;
+            
+            char* token = strtok(line, ",");
+            if (token) {
+                // Pembacaan Line Serial, dimasukkan kedalam hash
+                strcpy(new->info.ID, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.name, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.category, token);
+                token = strtok(NULL, ","); if(token) new->info.numStock = atoi(token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.plot.aisle, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.plot.bay, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.plot.level, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.plot.position, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.status, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.PIC, token);
+                token = strtok(NULL, ","); if(token) strcpy(new->info.owner, token);
+
+                int idx = djbHashFunction(new->info.ID);
+                if(storage->table[idx] == NULL) {
+                    storage->table[idx] = new;
+                } else {
+                    Node* temp = storage->table[idx];
+                    while(temp->next != NULL) temp = temp->next;
+                    temp->next = new;
+                }
+                count++;
+            } else {
+                free(new); 
+            }
+        }
+        
+        line = next_line;
+    }
+    
+    if(count > 0) printf(">> [SUKSES] %d data berhasil dimuat dari Arduino!\n", count);
+}
+
+void saveDataToArduino(hashTable* storage) {
+    if (hComm == INVALID_HANDLE_VALUE) return;
+    
+    printf("\n>> Menyimpan data ke Arduino...\n");
+    sendSerial("CMD:SAVE\n");
+    
+    int count = 0;
+    for (int i = 0; i < 10; i++) {
+        Node* curr = storage->table[i];
+        while (curr != NULL) {
+            char buffer[128];
+            sprintf(buffer, "%s,%s,%s,%d,%s,%s,%s,%s,%s,%s,%s\n",
+                    curr->info.ID, curr->info.name, curr->info.category, curr->info.numStock,
+                    curr->info.plot.aisle, curr->info.plot.bay, curr->info.plot.level, curr->info.plot.position,
+                    curr->info.status, curr->info.PIC, curr->info.owner);
+            
+            sendSerial(buffer);
+            curr = curr->next;
+            count++;
+            if (count >= 10) break; 
+        }
+        if (count >= 10) break;
+    }
+    
+    sendSerial("CMD:DONE\n");
+    CloseHandle(hComm);
+    printf(">> [SUKSES] %d data di-backup ke EEPROM.\n", count);
+}
 
 void menu(hashTable* storage){
     
