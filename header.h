@@ -57,7 +57,6 @@ typedef struct hashTable
 
 
 int djbHashFunction(char* id);
-void initializeStorage(hashTable* storage);
 
 void menu(hashTable* storage);
 void addData(hashTable* storage);
