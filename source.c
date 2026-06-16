@@ -128,12 +128,23 @@ void addData(hashTable* storage){
     new->next = NULL;
     strcpy(new->info.ID, inputID);
 
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF); //ini diperlukan untuk clear buffer
 
+    char line[15];
     printf("Masukkan nama barang: ");
-    scanf("%s", new->info.name); //masukkan nama
+    fgets(line, sizeof(line), stdin);
+
+    line[strcspn(line, "\n")] = 0;
+    strcpy(new->info.name, line);
 
     printf("Masukkan kategori: ");
-    scanf("%s", new->info.category); //masukkan kategori
+    //scanf("%s", new->info.category); //masukkan kategori
+    
+    fgets(line, sizeof(line), stdin);
+
+    line[strcspn(line, "\n")] = 0;
+    strcpy(new->info.category, line);
 
     printf("Masukkan jumlah stok awal: ");
     scanf("%d", &new->info.numStock);
@@ -237,7 +248,6 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
             while(1){
                 int numReq;
                 printf("Masukkan jumlah barang yang akan digunakan: ");
-                scanf("%d", &numReq);
                 
                 if(scanf("%d", &numReq) != 1){
                     printf("[GAGAL] Input tidak valid! Harap masukkan angka.\n");
