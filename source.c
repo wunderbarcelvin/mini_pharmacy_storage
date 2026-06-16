@@ -81,55 +81,74 @@ barang, jumlah stok, lokasi penyimpanan, status barang (misalnya tersedia, dipin
 */
 
 void addData(hashTable* storage){
-    Node* new = malloc(sizeof(Node));
+    char inputID[10];
     
-    if(!new) return;
+    
+    //Node* new = malloc(sizeof(Node));
+    
 
-    printf("Masukkan ID: "); scanf("%s", new->info.ID); //masukkan ID
-    int idx = djbHashFunction(new->info.ID);
+    printf("Masukkan ID: "); scanf("%s", inputID); //masukkan ID
+    int idx = djbHashFunction(inputID);
 
-    printf("Masukkan nama alat/barang: "); scanf("%s", new->info.name); //masukkan nama
+    //printf("Masukkan nama alat/barang: "); scanf("%s", new->info.name); //masukkan nama
     
     Node* temp = storage->table[idx];
-    Node* temp2; //pointer untuk menyimpan alamat terakhir setelah dikenai hash function
+    Node* prev = NULL; //pointer untuk menyimpan alamat terakhir setelah dikenai hash function
+    //hati-hati pointer tanpa inisiasi nilai awal
     
     while(temp!=NULL){
-        if(strcmp(temp->info.ID, new->info.ID)==0){
+        if(strcmp(temp->info.ID, inputID)==0){
             int add;
             printf("Masukkan jumlah stok tambahan: "); scanf("%d", &add);
             temp->info.numStock+=add;
             printf("Jumlah produk berhasil diupdate.\n");
             return;
         }
-        if(temp->next==NULL){ //jika selanjutnya tidak ada data lagi dan belum ada produk serupa yang pernah disimpan
-            temp2 = temp;
-        }
+        prev = temp;
         temp = temp->next;
     }
 
     printf("Produk belum pernah ditambahkan.\n");
+
+    Node* new = malloc(sizeof(Node));
+    if(!new){
+        perror("Gagal mengalokasikan memori.\n");
+        return;
+    }
     
-    printf("Masukkan kategori: "); scanf("%s", new->info.category);
-    printf("Masukkan jumlah stok: "); scanf("%d", new->info.numStock);
+    new->next = NULL;
+    strcpy(new->info.ID, inputID);
+
+
+    printf("Masukkan nama barang: ");
+    scanf("%s", new->info.name); //masukkan nama
+
+    printf("Masukkan kategori: ");
+    scanf("%s", new->info.category); //masukkan kategori
+
+    printf("Masukkan jumlah stok awal: ");
+    scanf("%d", &new->info.numStock);
+
     char location[15];
     printf("Masukkan koordinat lokasi: ");
     scanf("%s", location);
-    
     storeLocation(new, location);
     
-    //karena baru ditambahkan, maka statusnya available.
+    //karena baru ditambahkan, maka statusnya langsung available.
     strcpy(new->info.status, "Tersedia");
 
-    printf("Masukkan nama PIC: "); scanf("%s", new->info.PIC);
-    printf("Masukkan nama pemilik: "); scanf("%s", new->info.owner);
+    printf("Masukkan nama PIC: ");
+    scanf("%s", new->info.PIC);
+
+    printf("Masukkan nama pemilik: ");
+    scanf("%s", new->info.owner);
     
 
     //store to the hash table
     if(storage->table[idx]==NULL){
         storage->table[idx] = new;
     } else{
-        temp2->next=new;
-        new->next = NULL;
+        prev->next = new;
     }
     
     printf("Produk berhasil ditambahkan.\n");
