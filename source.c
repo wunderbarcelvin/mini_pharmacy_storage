@@ -31,8 +31,8 @@ void menu(hashTable* storage){
     int choice;
     do
     {
-        printf("\n>>Selamat datang di laman manajemen stok gudang XYZ\n");
-        printf(">>Silakan pilih salah satu instruksi di bawah.\n");
+        printf("\n>> Selamat datang di laman manajemen stok gudang XYZ\n");
+        printf(">> Silakan pilih salah satu instruksi di bawah.\n");
 
         printf("1. Menambahkan produk.\n");
         printf("2. Menghapus produk.\n");
@@ -68,9 +68,10 @@ void menu(hashTable* storage){
             mask(storage);
             break;
         case 8:
-            printf(">>Keluar dari program..\n");
+            printf(">> Keluar dari program..\n");
+            break;
         default:
-            printf(">>Perintah tidak dikenali. Coba lagi.\n");
+            printf(">> Perintah tidak dikenali. Coba lagi.\n");
             break;
         }
     } while (choice!=8);
@@ -97,21 +98,21 @@ void addData(hashTable* storage){
     while(temp!=NULL){
         if(strcmp(temp->info.ID, inputID)==0){
             int add;
-            printf("Produk sudah pernah ditambahkan.\n");
+            printf(">> Produk sudah pernah ditambahkan.\n");
             printf("Masukkan jumlah stok tambahan: "); scanf("%d", &add);
             temp->info.numStock+=add;
-            printf("Jumlah produk berhasil diupdate.\n");
+            printf("[SUKSES] Jumlah produk berhasil diupdate.\n");
             return;
         }
         prev = temp;
         temp = temp->next;
     }
 
-    printf("Produk belum pernah ditambahkan.\n");
+    printf(">> Produk belum pernah ditambahkan.\n");
 
     Node* new = malloc(sizeof(Node));
     if(!new){
-        perror("Gagal mengalokasikan memori.\n");
+        perror("[GAGAL] Gagal mengalokasikan memori.\n");
         return;
     }
     
@@ -150,7 +151,7 @@ void addData(hashTable* storage){
         prev->next = new;
     }
     
-    printf("Produk berhasil ditambahkan.\n");
+    printf("[SUKSES] Produk berhasil ditambahkan.\n");
 }
 
 
@@ -159,7 +160,7 @@ void storeLocation(Node* data, char* coordinate){
     char* token = strtok(coordinate, "-");
     
     if(!token){
-        perror("Error parsing.");
+        perror(">> Gagal parsing.");
         return;
     }
     strncpy(data->info.plot.aisle, token, 2); //aisle
@@ -194,14 +195,14 @@ void removeData(hashTable* storage){ //menggunakan
                 prev->next = curr->next;
             }
             free(curr);
-            printf("Data produk berhasil dihapus.\n");
+            printf("[SUKSES] Data produk berhasil dihapus.\n");
             return;
         }
         prev = curr;
         curr = curr->next;
     }
     
-    printf("Data produk tidak ditemukan.\n");
+    printf("[GAGAL] Data produk tidak ditemukan.\n");
 }
 
 void withdrawProduct(hashTable* storage){ //fungsi baru
@@ -219,19 +220,19 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
                 scanf("%d", &numReq);
                 
                 if(scanf("%d", &numReq) != 1){
-                    printf("Input tidak valid! Harap masukkan angka.\n");
+                    printf("[GAGAL] Input tidak valid! Harap masukkan angka.\n");
                     while (getchar() != '\n')
                     continue;;
                 }
                 
                 if(numReq==0){
-                    printf("Coba masukkan angka lebih dari nol.\n");
+                    printf("[GAGAL] Coba masukkan angka lebih dari nol.\n");
                     continue;
                 }
                 
                 if(curr->info.numStock - numReq>=0){
                     curr->info.numStock-=numReq;
-                    printf("Produk %s sejumlah %d unit berhasil ditarik.\n", curr->info.name, numReq);
+                    printf("[SUKSES] Produk %s sejumlah %d unit berhasil ditarik.\n", curr->info.name, numReq);
                     
                     if(curr->info.numStock==0){
                         strcpy(curr->info.status, "Habis");
@@ -239,13 +240,13 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
                     return;
                 }
 
-                printf(">> Jumlah unit yang diminta melebihi stok. Coba lagi.\n");
+                printf("[GAGAL] Jumlah unit yang diminta melebihi stok. Coba lagi.\n");
             }
            
         }
         curr = curr->next;
     }
-    printf(">> Data produk tidak ditemukan.\n");
+    printf("[GAGAL] Data produk tidak ditemukan.\n");
 }
 
 void searchProduct(hashTable* storage){
@@ -276,7 +277,7 @@ void searchProduct(hashTable* storage){
         }
         curr = curr->next;
     }
-    printf(">> Data produk tidak ditemukan.\n");
+    printf("[GAGAL} Data produk tidak ditemukan.\n");
 }
 
 void updateProduct(hashTable* storage) { //UPDATE ADA YANG DIUBAH
@@ -512,7 +513,7 @@ void mask(hashTable* storage){ //MASK ADA YANG DIUBAH
             break;
     }
 
-    printf("\n=== Hasil Pencarian Filter Stok (%d - %d) ===\n", minStock, maxStock);
+    printf("\n=== Hasil Pencarian Filter Stok ===\n");
     for (int i = 0; i < 10; i++) {
         Node* curr = storage->table[i];
 
@@ -600,7 +601,7 @@ void printUniquePIC(hashTable* storage, int* count){
         
         while(curr){
             bool isDuplicate = false;
-            for (int j = 0; j < uniqueCount; i++)
+            for (int j = 0; j < uniqueCount; j++)
             {
                 if(strcmp(curr->info.PIC, seenPICs[j])==0){
                     isDuplicate=true;
@@ -631,7 +632,7 @@ void printUniqueName(hashTable* storage, int* count){
         
         while(curr){
             bool isDuplicate = false;
-            for (int j = 0; j < uniqueCount; i++)
+            for (int j = 0; j < uniqueCount; j++)
             {
                 if(strcmp(curr->info.name, seenProducts[j])==0){
                     isDuplicate=true;
@@ -695,7 +696,7 @@ void printUniqueOwnwer(hashTable* storage, int* count){
         
         while(curr){
             bool isDuplicate = false;
-            for (int j = 0; j < uniqueCount; i++)
+            for (int j = 0; j < uniqueCount; j++)
             {
                 if(strcmp(curr->info.owner, seenOwners[j])==0){
                     isDuplicate=true;
