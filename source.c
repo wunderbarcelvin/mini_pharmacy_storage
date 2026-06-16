@@ -31,8 +31,8 @@ void menu(hashTable* storage){
     int choice;
     do
     {
-        print("Selamat datang di laman manajemen stok gudang XYZ\n");
-        print("Silakan pilih salah satu instruksi di bawah.");
+        printf("Selamat datang di laman manajemen stok gudang XYZ\n");
+        printf("Silakan pilih salah satu instruksi di bawah.");
 
         printf("1. Menambahkan produk.\n");
         printf("2. Menghapus produk.\n");
@@ -240,13 +240,13 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
                     return;
                 }
 
-                printf("Jumlah unit yang diminta melebihi stok. Coba lagi.\n");
+                printf(">> Jumlah unit yang diminta melebihi stok. Coba lagi.\n");
             }
            
         }
         curr = curr->next;
     }
-    printf("Data produk tidak ditemukan.\n");
+    printf(">> Data produk tidak ditemukan.\n");
 }
 
 void searchProduct(hashTable* storage){
@@ -259,10 +259,10 @@ void searchProduct(hashTable* storage){
     while(curr){
         if(strcmp(curr->info.ID, ID)==0){
             char print;
-            printf("Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n): ");
+            printf(">> Produk ditemukan.\n Apakah Anda ingin mencetak rincian info tentang produk? (y/n): ");
             scanf(" %c", &print);
             if(print=='y'|| print=='Y'){
-                printf("ID Produk: %s", curr);
+                printf("ID Produk: %s", curr->info.ID);
                 printf("Nama Produk: %s", curr->info.name);
                 printf("Kategori: %s", curr->info.category);
                 printf("Jumlah stok: %d", curr->info.numStock);
@@ -277,7 +277,7 @@ void searchProduct(hashTable* storage){
         }
         curr = curr->next;
     }
-    printf("Data produk tidak ditemukan.\n");
+    printf(">> Data produk tidak ditemukan.\n");
 }
 
 void updateProduct(hashTable* storage) {
@@ -287,7 +287,6 @@ void updateProduct(hashTable* storage) {
     scanf("%s", ID);
 
     int idx = djbHashFunction(ID);
-    
     Node* curr = storage->table[idx];
 
     while (curr != NULL) {
@@ -302,24 +301,39 @@ void updateProduct(hashTable* storage) {
             printf("Masukkan pilihan (1-4): ");
             scanf("%d", &option);
 
-            while (getchar() != '\n'); 
+            while (getchar() != '\n'); //besihkan angka setelah menu
 
-            switch(option) {
-                case 1: {
+            switch(option){
+                case 1:{
                     char newLocation[15];
                     printf("Masukkan koordinat lokasi baru (Format: Aisle-Bay-Level-Posisi, misal A1-B1-L1-P1): ");
-                    fgets(newLocation, sizeof(newLocation), stdin);
+                    
+                    scanf("%s", newLocation);
                     storeLocation(curr, newLocation);
                     printf(">> [SUKSES] Lokasi penyimpanan berhasil diperbarui!\n");
                     break;
                 }
-                
-                case 2:
+                                   
+                case 2:{
+                    char newStatus[8];
                     printf("Masukkan Status Baru: ");
-                    fgets(curr->info.status, sizeof(curr->info.status), stdin);
-                    curr->info.status[strcspn(curr->info.status, "\n")] = 0; 
+                    scanf("%s", newStatus);
+
+                    if(strcmp(newStatus, "Habis")==0){
+                        if(curr->info.numStock!=0){
+                            printf("[GAGAL] Request produk terlebih dulu supaya jumlahnya berkurang.\n"); //harus withdrawProduct terlebih dulu
+                            return;
+                        } else{
+                            strcpy(curr->info.status, newStatus);
+                        }
+                    } else{
+                        strcpy(curr->info.status, newStatus);
+                    }
+                    
                     printf(">> [SUKSES] Status berhasil diperbarui!\n");
                     break;
+                }
+                    
                 
                 case 3:
                     printf("Masukkan Nama Pemilik Baru: ");

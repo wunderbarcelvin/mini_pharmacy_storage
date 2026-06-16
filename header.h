@@ -1,5 +1,8 @@
 #ifndef TUBES_H
 #define TUBES_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**Spesifikasi fungsi:
 Add data
@@ -23,10 +26,10 @@ barang, jumlah stok, lokasi penyimpanan, status barang (misalnya tersedia, dipin
 
 typedef struct Location
 {
-    char aisle[2]; //walkways in the warehouse, contohnya A1
-    char bay[2]; //section of rack, contohnya B2
-    char level[2]; //vertical level of rack
-    char position[2];
+    char aisle[3]; //walkways in the warehouse, contohnya A1
+    char bay[3]; //section of rack, contohnya B2
+    char level[3]; //vertical level of rack
+    char position[3];
 } Location;
 
 typedef struct Data
@@ -36,7 +39,7 @@ typedef struct Data
     char category[15];
     int numStock;
     Location plot;
-    char status[8];
+    char status[9];
     char PIC[20];
     char owner[20];
 } Data;
@@ -54,6 +57,7 @@ typedef struct hashTable
 
 
 int djbHashFunction(char* id);
+void initializeStorage(hashTable* storage);
 
 void menu(hashTable* storage);
 void addData(hashTable* storage);
