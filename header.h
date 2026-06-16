@@ -40,8 +40,8 @@ typedef struct Data
     int numStock;
     Location plot;
     char status[9];
-    char PIC[20];
-    char owner[20];
+    char PIC[8];
+    char owner[8];
 } Data;
 
 typedef struct Node
@@ -57,6 +57,7 @@ typedef struct hashTable
 
 
 int djbHashFunction(char* id);
+void initializeStorage(hashTable* storage);
 
 void menu(hashTable* storage);
 void addData(hashTable* storage);
