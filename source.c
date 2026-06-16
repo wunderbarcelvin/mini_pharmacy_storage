@@ -257,12 +257,23 @@ void addData(hashTable* storage){
     new->next = NULL;
     strcpy(new->info.ID, inputID);
 
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF); //ini diperlukan untuk clear buffer
 
+    char line[15];
     printf("Masukkan nama barang: ");
-    scanf("%s", new->info.name); //masukkan nama
+    fgets(line, sizeof(line), stdin);
+
+    line[strcspn(line, "\n")] = 0;
+    strcpy(new->info.name, line);
 
     printf("Masukkan kategori: ");
-    scanf("%s", new->info.category); //masukkan kategori
+    //scanf("%s", new->info.category); //masukkan kategori
+    
+    fgets(line, sizeof(line), stdin);
+
+    line[strcspn(line, "\n")] = 0;
+    strcpy(new->info.category, line);
 
     printf("Masukkan jumlah stok awal: ");
     scanf("%d", &new->info.numStock);
@@ -291,7 +302,6 @@ void addData(hashTable* storage){
     
     printf("[SUKSES] Produk berhasil ditambahkan.\n");
 }
-
 
 void storeLocation(Node* data, char* coordinate){
     //template koordinat: zona - aisle - bay - level - position
@@ -366,7 +376,6 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
             while(1){
                 int numReq;
                 printf("Masukkan jumlah barang yang akan digunakan: ");
-                scanf("%d", &numReq);
                 
                 if(scanf("%d", &numReq) != 1){
                     printf("[GAGAL] Input tidak valid! Harap masukkan angka.\n");
@@ -397,7 +406,6 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
     }
     printf("[GAGAL] Data produk tidak ditemukan.\n");
 }
-
 void searchProduct(hashTable* storage){
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
@@ -863,26 +871,4 @@ void printUniqueOwnwer(hashTable* storage, int* count){
         
     }
     *count = uniqueCount;
-}
-int main(void){
-    // Inisialisasi port serial (GANTI PORT SESUAI ARDUINOMU)
-    initSerial("\\\\.\\COM7");
-
-    clock_t start_time = clock();
-
-    hashTable storage;
-    for (int i = 0; i < 10; i++)
-    {
-        storage.table[i]= NULL;
-    }
-    
-    loadDataFromArduino(&storage);
-
-    menu(&storage);
-
-    clock_t end_time = clock();
-    double time_taken = ((double)(end_time-start_time))/ CLOCKS_PER_SEC;
-    printf("Fungsi memakan %f sekon untuk dieksekusi.\n", time_taken);
-    
-    return 0;
 }
