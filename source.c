@@ -1,4 +1,9 @@
 #include "header.h"
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 int djbHashFunction(char* id){ //inspired by Dan Berstein
     unsigned long hash = 5381;
@@ -21,9 +26,10 @@ Print all data
 Print summary about inventories. Di sini bisa buat subfungsi menu dalam voidnya
 Classify based on category, location, and status
 Mask ID based on interval of number of stock */
+
 HANDLE hComm;
 
-void initSerial(const char* port){
+void initSerial(const char* port) {
     hComm = CreateFile(port, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     if (hComm == INVALID_HANDLE_VALUE) return;
     
@@ -50,8 +56,7 @@ void sendSerial(const char* msg) {
     if (hComm == INVALID_HANDLE_VALUE) return;
     DWORD written;
     WriteFile(hComm, msg, strlen(msg), &written, NULL);
-    Sleep(100);
-}
+    Sleep(100); }
 
 void loadDataFromArduino(hashTable* storage) {
     if (hComm == INVALID_HANDLE_VALUE) {
@@ -121,7 +126,6 @@ void loadDataFromArduino(hashTable* storage) {
     
     if(count > 0) printf(">> [SUKSES] %d data berhasil dimuat dari Arduino!\n", count);
 }
-
 void saveDataToArduino(hashTable* storage) {
     if (hComm == INVALID_HANDLE_VALUE) return;
     
@@ -150,7 +154,6 @@ void saveDataToArduino(hashTable* storage) {
     CloseHandle(hComm);
     printf(">> [SUKSES] %d data di-backup ke EEPROM.\n", count);
 }
-
 void menu(hashTable* storage){
     
     int choice;
@@ -197,6 +200,7 @@ void menu(hashTable* storage){
             mask(storage);
             break;
         case 9:
+            saveDataToArduino(storage);
             printf(">> Keluar dari program..\n");
             return;
         default:
@@ -298,7 +302,6 @@ void addData(hashTable* storage){
     
     printf("[SUKSES] Produk berhasil ditambahkan.\n");
 }
-
 
 void storeLocation(Node* data, char* coordinate){
     //template koordinat: zona - aisle - bay - level - position
@@ -403,7 +406,6 @@ void withdrawProduct(hashTable* storage){ //fungsi baru
     }
     printf("[GAGAL] Data produk tidak ditemukan.\n");
 }
-
 void searchProduct(hashTable* storage){
     char ID[20];
     printf("Masukkan ID: "); scanf("%s", ID); //masukkan ID
@@ -487,6 +489,11 @@ void updateProduct(hashTable* storage) { //UPDATE ADA YANG DIUBAH
                     printf("Masukkan Status Baru: ");
                     scanf("%s", newStatus);
 
+                    if(strcmp(curr->info.status, newStatus)==0){
+                        printf("Produk sudah memiliki status %s.\n", newStatus);
+                        break;
+                    }
+
                     if(strcmp(newStatus, "Habis")==0){
                         if(curr->info.numStock!=0){
                             printf("[GAGAL] Request produk terlebih dulu supaya jumlahnya berkurang.\n"); //harus withdrawProduct terlebih dulu
@@ -545,7 +552,7 @@ void printAllProducts(hashTable* storage){
             int len = strlen(curr->info.ID);
 
             strcpy(maskedID, curr->info.ID);
-            if (len > 4) {
+            if (len > 2) {
                 for (int j = 2; j < len - 2; j++) {
                     maskedID[j] = '*';
                 }
@@ -594,8 +601,8 @@ void printUniques(hashTable* storage){
     printf("Pilih dasar klasifikasi pencarian:\n");
     printf("1. Berdasarkan Nama Barang\n");
     printf("2. Berdasarkan Kategori\n");
-    printf("3. Berdasarkan Nama Pemilik (contoh: Tersedia)\n");
-    printf("4. Berdasarkan Nama PIC (contoh: Tersedia)\n");
+    printf("3. Berdasarkan Nama Pemilik\n");
+    printf("4. Berdasarkan Nama PIC\n");
     
     printf("Masukkan pilihan Anda: ");
     scanf("%d", &pilihan);
@@ -620,7 +627,7 @@ void printUniques(hashTable* storage){
     }
 
     // Penanganan jika tidak ada data yang cocok sesuai syarat
-    printf("\nTotal: %d macam produk unik ditemukan.\n", countUnique);
+    printf("\nTotal: %d nilai unik ditemukan.\n", countUnique);
     printf("==================================\n\n");
 }
 
@@ -631,7 +638,7 @@ void mask(hashTable* storage){ //MASK ADA YANG DIUBAH
     int pilihan;
     printf("Pilih kriteria pencarian:\n");
     printf("1. Berdasarkan Kategori\n");
-    printf("2. Berdasarkan Zona Lokasi (contoh: DRY)\n");
+    printf("2. Berdasarkan Zona Lokasi\n");
     printf("3. Berdasarkan Status (contoh: Tersedia)\n");
     printf("4. Berdasarkan Jumlah Stok \n");
 
@@ -646,7 +653,7 @@ void mask(hashTable* storage){ //MASK ADA YANG DIUBAH
             break;
 
         case 2:
-            printf("Masukkan nama aisle yang dicari: ");
+            printf("Masukkan nama aisle yang dicari (contoh: A1): ");
             scanf("%s", keyword);
             break;
 
